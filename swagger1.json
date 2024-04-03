@@ -1,0 +1,219 @@
+{
+    "swagger": "2.0",
+    "info": {
+      "title": "Events API",
+      "description": "A API that helps manage events.",
+      "version": "v1"
+    },
+    "basePath": "/api",
+    "schemes": [
+      "http"
+    ],
+    "consumes": [
+      "app/json"
+    ],
+    "produces": [
+      "app/json"
+    ],
+    "paths": {
+      "/events": {
+        "get": {
+          "summary": "Returns all events available in database.",
+          "produces": [
+            "app/json"
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful response.",
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "entity_id": {
+                        "type": "string",
+                        "description": "ID of the event"
+                      }
+                    }
+                  }
+                }
+            }
+          }
+        },
+        "post": {
+          "summary": "Adds new event.",
+          "produces": [
+            "app/json"
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful response.",
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "entity_id": {
+                        "type": "string",
+                        "description": "ID of the event"
+                      }
+                    }
+                  }
+                }
+            }
+          }
+        },
+        
+          "delete": {
+            "summary": "Deletes an event.",
+            "produces": [
+              "app/json"
+            ],
+            "responses": {
+              "200": {
+                "description": "Successful response.",
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "entity_id": {
+                          "type": "string",
+                          "description": "ID of the event"
+                        }
+                      }
+                    }
+                  }
+              }
+            }
+          },
+          "put": {
+            "summary": "Updates an event.",
+            "produces": [
+              "app/json"
+            ],
+            "responses": {
+              "200": {
+                "description": "Successful response.",
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "entity_id": {
+                          "type": "string",
+                          "description": "ID of the event"
+                        }
+                      }
+                    }
+                  }
+              }
+            }
+          }
+        }
+      },
+      "/events?id": {
+        "get": {
+          "summary": "Returns a specific event.",
+          "produces": [
+            "app/json"
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful response.",
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "entity_id": {
+                        "type": "string",
+                        "description": "ID of the event"
+                      }
+                    }
+                  }
+                }
+            }
+          }
+        }
+      },
+      "/event?type": {
+        "get": {
+          "summary": "Returns all events of a specific type.",
+          "produces": [
+            "app/json"
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful response.",
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "entity_id": {
+                        "type": "string",
+                        "description": "ID of the event"
+                      }
+                    }
+                  }
+                }
+            }
+          }
+        }
+      },
+      "/events?date": {
+        "get": {
+          "summary": "Returns all events of a specific date.",
+          "produces": [
+            "app/json"
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful response.",
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "entity_id": {
+                        "type": "string",
+                        "description": "ID of the event"
+                      }
+                    }
+                  }
+                }
+            }
+          }
+        }
+      },
+      "/events?location":{
+        "get": {
+          "summary": "Returns all events of a specific location.",
+          "produces": [
+            "app/json"
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful response.",
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "entity_id": {
+                        "type": "string",
+                        "description": "ID of the event"
+                      }
+                    }
+                  }
+                }
+            }
+          }
+        }
+      }
+    }
+      
+    
+
+       

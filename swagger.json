@@ -6,29 +6,7 @@
       "version": "1.0.0"
     },
     "paths": {
-      "/": {
-        "get": {
-          "summary": "Get a hello message",
-          "responses": {
-            "200": {
-              "description": "Successful operation",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "message": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-        "/events":{ 
+        "/v1/events":{ 
           "get": {
             "summary": "Get a list of events",
             "responses": {
@@ -57,9 +35,57 @@
                 }
               }
             }
+          },
+          "post": {
+            "summary": "Create a new event",
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "date": {
+                        "type": "string"
+                      },
+                      "location": {
+                        "type": "string"
+                      },
+                      "price": {
+                        "type": "integer"
+                      },
+                      "type": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "Successful operation",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
+          
       },
-      "/events?date":{
+      "/v1/events?date":{
         "get": {
           "summary": "Get a list of events by date",
           "parameters": [
@@ -100,7 +126,7 @@
           }
         }
       },
-      "events?location":{
+      "/v1/events?location":{
         "get": {
           "summary": "Get a list of events by location",
           "parameters": [
@@ -141,7 +167,7 @@
           }
         }
       },
-      "/events?price":{
+      "/v1/events?price":{
         "get": {
           "summary": "Get a list of events by price",
           "parameters": [
@@ -184,7 +210,7 @@
 
       },
 
-      "events?type":{
+      "/v1/events?type":{
         "get": {
           "summary": "Get a list of events by type",
           "parameters": [
@@ -226,7 +252,7 @@
         }
       },
 
-      "events?id":{
+      "/v1/delete":{
         "delete": {
           "summary": "Delete an event by id",
           "parameters": [
@@ -258,7 +284,7 @@
           }
         }
       },
-      "/events?id":{
+      "/v1/events?id":{
         "patch":{
           "summary": "Update an event by id",
           "parameters": [
