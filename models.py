@@ -1,10 +1,13 @@
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
-from db_config import db
+from sqlalchemy import create_engine
+from sqlalchemy.engine import reflection
+from sqlalchemy.orm import declarative_base
+from db_config import db, get_db
 
+engine = create_engine(get_db())
 
-class APIKEYS(db.Model):
+Base = declarative_base()
+
+class APIKEYS(Base):
     __tablename__ = 'apikeys'
     id = db.Column(db.Integer, primary_key=True)
     
@@ -17,7 +20,7 @@ class APIKEYS(db.Model):
         }
     
 
-class Events(db.Model):
+class Events(Base):
     __tablename__ = 'events'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), nullable=False)
@@ -43,3 +46,10 @@ class Events(db.Model):
             'location': self.location,
             'price': self.price
         }
+    
+insp = reflection.Inspector.from_engine(engine)
+    
+# if table does not exist, create it
+if not insp.has_table(APIKEYS.__tablename__):
+    print(" * Creating database tables")
+    Base.metadata.create_all(engine)
