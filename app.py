@@ -1,247 +1,260 @@
-from flask import Flask, jsonify, Response
-from flask_restful import Resource, Api
-from flask_sqlalchemy import SQLAlchemy
+from flask import Flask, jsonify, request, Response
+from flask_restful import Resource, Api, reqparse
 from flask_swagger_ui import get_swaggerui_blueprint
-from flask import request
-from dotenv import load_dotenv
-import random
-from datetime import date, timedelta
-#from flaskext.mysql import MySQL
+from models import *
+from datetime import datetime
+from db_config import * 
 import mysql.connector
+from mysql.connector import Error
 import json
-import os
-from sqlalchemy import create_engine
 
 
 app = Flask(__name__)
 api = Api(app)
 
-load_dotenv()
+app.config['SQLALCHEMY_DATABASE_URI'] = get_db()
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = get_sqlalchemy_track_modifications()
 
-db_config = {
-    'host': os.environ.get("HOST"),
-    'port': os.environ.get("PORT"),
-    'user': os.environ.get("USER_NAME"),
-    'password': os.environ.get("PASSWORD"),
-    'database': os.environ.get('DATABASE')
-}
+db.init_app(app)
 
 def get_db_connection():
-    conn = mysql.connector.connect(**db_config)
-    return conn
+    try:
+        conn = mysql.connector.connect(**db_config)
+        return conn
+    except Error as e:
+        print(f"Error connecting to MySQL: {e}")
+        return None
 
+class APIkey(Resource):
 
-# Define a sample resource
-class HelloWorld(Resource):
     def get(self):
-        return jsonify({'message': 'Hello, World!'})
-    
+        try:
+            apikeys = APIKEYS.query.all()  
+            if not apikeys:  
+                return jsonify([])  
+
+            return jsonify([{'ID': apikey.ID} for apikey in apikeys])
+
+        except Exception as e:
+            return {"error": str(e)}, 500
+
 
 class Events(Resource):
-    def get(self, event_id=None):
-        if event_id:
-            conn = get_db_connection()
-            cursor = conn.cursor()
-            query = "SELECT * FROM events WHERE id = %s"
-            values = (event_id,)
-            try:
-                cursor.execute(query, values)
-                result = cursor.fetchall()
-                return jsonify({'event': result})
-            except mysql.connector.Error as e:
-                print(e)
-                return Response("Failed to get standings", status=500, mimetype='application/json')
-            finally:
-                cursor.close()
-                conn.close()
-        else:
-            conn = get_db_connection()
-            cursor = conn.cursor()
 
-            query = "SELECT * FROM events"
+    #GET /events/<int:event_id>
+    def get(self, event_id):
+        parser = reqparse.RequestParser()
+        parser.add_argument('event_id', type=int)
+        args = parser.parse_args()
+        event_id = args['event_id']
 
-            try:
-                cursor.execute(query)
-                result = cursor.fetchall()
-                return jsonify({'event': result})
-            except mysql.connector.Error as e:
-                print(e)
-                return Response(status=500)
-            finally:
-                cursor.close()
-                conn.close()
-
-    def post(self,event_id=None):
-            conn = get_db_connection()
-            cursor = conn.cursor()
-            query = "INSERT INTO events (name, type, location, date, price) VALUES (%s, %s, %s, %s, %s)"
-            values = (request.json['name'], request.json['type'], request.json['location'], request.json['date'], request.json['price'])
-            try:
-                cursor.execute(query, values)
-                conn.commit()
-                return Response(status=201)
-            except mysql.connector.Error as e:
-                print(e)
-                return Response(status=500)
-            finally:
-                cursor.close()
-                conn.close()
-
-    def delete(self, event_id=None):
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        query = "DELETE FROM events WHERE id = %s"
-        values = (event_id,)
         try:
-            cursor.execute(query, values)
-            conn.commit()
-            return Response(status=204)
-        except mysql.connector.Error as e:
-            print(e)
-            return Response(status=500)
-        finally:
-            cursor.close()
-            conn.close()
-    
-    def patch(self, event_id=None):
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        query = "UPDATE events SET name = %s, type = %s, location = %s, date = %s, price = %s WHERE id = %s"
-        values = (request.json['name'], request.json['type'], request.json['location'], request.json['date'], request.json['price'], event_id)
-        try:
-            cursor.execute(query, values)
-            conn.commit()
-            return Response(status=204)
-        except mysql.connector.Error as e:
-            print(e)
-            return Response(status=500)
-        finally:
-            cursor.close()
-            conn.close()
+            if event_id is None:
+                events = Events.query.all()
+                if not events:
+                    return jsonify([])
 
-class Date(Resource):
-    def get(self, date=None):
-        if date:
-            conn = get_db_connection()
-            cursor = conn.cursor()
+                return jsonify([event.to_dict() for event in events])
+            else:
+                events = Events.query.filter_by(id=event_id).first()
+                if events is None:
+                    return jsonify({"error": "Event not found"}), 404
+                
+            return jsonify([events.to_dict()])
+        except Exception as e:
+            return {"error": str(e)}, 500
         
-            query = "SELECT * FROM events WHERE date BETWEEN %s AND %s"
-            values = (date,)
-            try:
-                cursor.execute(query, values)
-                result = cursor.fetchall()
-                return jsonify({'event': result})
-            except mysql.connector.Error as e:
-                print(e)
-                return Response(status=500)
-            finally:
-                cursor.close()
-                conn.close()
-        else:
-            conn = get_db_connection()
-            cursor = conn.cursor()
+    #GET /events/name?<string:name>
+    def get(self, name):
+        parser = reqparse.RequestParser()
+        parser.add_argument('name', type=str)
+        args = parser.parse_args()
+        name = args['name']
 
-            query = "SELECT * FROM events"
-
-            try:
-                cursor.execute(query)
-                result = cursor.fetchall()
-                return jsonify({'event': result})
-            except mysql.connector.Error as e:
-                print(e)
-                return Response(status=500)
-            finally:
-                cursor.close()
-                conn.close()
-
-class Type(Resource):
-    def get(self, type=None):
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        query = "SELECT * FROM events WHERE type = %s"
-        values = (type,)
         try:
-            cursor.execute(query, values)
-            result = cursor.fetchall()
-            return jsonify({'event': result})
-        except mysql.connector.Error as e:
-            print(e)
-            return Response(status=500)
-        finally:
-            cursor.close()
-            conn.close()
+            if name is None:
+                events = Events.query.all()
+                if not events:
+                    return jsonify([])
 
-class Location(Resource):
-    def get(self, location=None):
-        conn = get_db_connection()
-        cursor = conn.cursor()
+                return jsonify([event.to_dict() for event in events])
+            else:
+                events = Events.query.filter_by(name=name).first()
+                if events is None:
+                    return jsonify({"error": "Event not found"}), 404
+                
+            return jsonify([events.to_dict()])
+        except Exception as e:
+            return {"error": str(e)}, 500
 
-        query = "SELECT * FROM events WHERE location = %s"
-        values = (location,)
+    #GET /events/date?<string:date>
+    def get(self, date):    
+        parser = reqparse.RequestParser()
+        parser.add_argument('date', type=str)
+        args = parser.parse_args()
+        date = args['date']
+
         try:
-            cursor.execute(query, values)
-            result = cursor.fetchall()
-            return jsonify({'event': result})
-        except mysql.connector.Error as e:
-            print(e)
-            return Response(status=500)
-        finally:
-            cursor.close()
-            conn.close()
+            if date is None:
+                events = Events.query.all()
+                if not events:
+                    return jsonify([])
 
+                return jsonify([event.to_dict() for event in events])
+            else:
+                events = Events.query.filter_by(date=date).first()
+                if events is None:
+                    return jsonify({"error": "Event not found"}), 404
+                
+            return jsonify([events.to_dict()])
+        except Exception as e:
+            return {"error": str(e)}, 500
 
-class Price(Resource):
-    def get(self, price=None):
-        conn = get_db_connection()
-        cursor = conn.cursor()
+    #GET /events/type?<string:type>
+    def get(self, type):
+        parser = reqparse.RequestParser()
+        parser.add_argument('type', type=str)
+        args = parser.parse_args()
+        type = args['type']
 
-        query = "SELECT * FROM events WHERE price = %s"
-        values = (price,)
         try:
-            cursor.execute(query, values)
-            result = cursor.fetchall()
-            return jsonify({'event': result})
-        except mysql.connector.Error as e:
-            print(e)
-            return Response(status=500)
-        finally:
-            cursor.close()
-            conn.close()
+            if type is None:
+                events = Events.query.all()
+                if not events:
+                    return jsonify([])
 
+                return jsonify([event.to_dict() for event in events])
+            else:
+                events = Events.query.filter_by(type=type).first()
+                if events is None:
+                    return jsonify({"error": "Event not found"}), 404
+                
+            return jsonify([events.to_dict()])
+        except Exception as e:
+            return {"error": str(e)}, 500
 
-class Price(Resource):
-    def get(self, price=None):
-        conn = get_db_connection()
-        cursor = conn.cursor()
+    #GET /events/location?<string:location>
+    def get(self, location):
+        parser = reqparse.RequestParser()
+        parser.add_argument('location', type=str)
+        args = parser.parse_args()
+        location = args['location']
 
-        query = "SELECT * FROM events WHERE price = %s"
-        values = (price,)
         try:
-            cursor.execute(query, values)
-            result = cursor.fetchall()
-            return jsonify({'event': result})
-        except mysql.connector.Error as e:
-            print(e)
-            return Response(status=500)
-        finally:
-            cursor.close()
-            conn.close()
+            if location is None:
+                events = Events.query.all()
+                if not events:
+                    return jsonify([])
+
+                return jsonify([event.to_dict() for event in events])
+            else:
+                events = Events.query.filter_by(location=location).first()
+                if events is None:
+                    return jsonify({"error": "Event not found"}), 404
+                
+            return jsonify([events.to_dict()])
+        except Exception as e:
+            return {"error": str(e)}, 500
+
+    #GET /events/price?<float:price>
+    def get(self, price):
+        parser = reqparse.RequestParser()
+        parser.add_argument('price', type=float)
+        args = parser.parse_args()
+        price = args['price']
+
+        try:
+            if price is None:
+                events = Events.query.all()
+                if not events:
+                    return jsonify([])
+
+                return jsonify([event.to_dict() for event in events])
+            else:
+                events = Events.query.filter_by(price=price).first()
+                if events is None:
+                    return jsonify({"error": "Event not found"}), 404
+                
+            return jsonify([events.to_dict()])
+        except Exception as e:
+            return {"error": str(e)}, 500
+
+    #POST /events
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('name', type=str, required=True)
+        parser.add_argument('date', type=str, required=True)
+        parser.add_argument('type', type=str, required=True)
+        parser.add_argument('location', type=str, required=True)
+        parser.add_argument('price', type=float, required=True)
+        args = parser.parse_args()
+
+        try:
+            event = Events(
+                name=args['name'],
+                date=args['date'],
+                type=args['type'],
+                location=args['location'],
+                price=args['price']
+            )
+            db.session.add(event)
+            db.session.commit()
+            return jsonify(event.to_dict()), 201
+        except Exception as e:
+            return {"error": str(e)}, 500
+
+    #PUT /events/<int:event_id>
+    def put(self, event_id):
+        parser = reqparse.RequestParser()
+        parser.add_argument('name', type=str, required=True)
+        parser.add_argument('date', type=str, required=True)
+        parser.add_argument('type', type=str, required=True)
+        parser.add_argument('location', type=str, required=True)
+        parser.add_argument('price', type=float, required=True)
+        args = parser.parse_args()
+
+        try:
+            event = Events.query.filter_by(id=event_id).first()
+        
+            event.name = args['name']
+            event.date = args['date']
+            event.type = args['type']
+            event.location = args['location']
+            event.price = args['price']
+
+            db.session.commit()
+            return jsonify(event.to_dict()), 200
+        except Exception as e:
+            return {"error": str(e)}, 500
+
+    #DELETE /events/<int:event_id>
+    def delete(self, event_id):
+        try:
+            event = Events.query.filter_by(id=event_id).first()
+            if event is None:
+                return jsonify({"error": "Event not found"}), 404
+
+            db.session.delete(event)
+            db.session.commit()
+            return '', 204
+        except Exception as e:
+            return {"error": str(e)}, 500    
+        
+   
 
        
 # Add the resources to the API
-api.add_resource(HelloWorld, '/')
-
-api.add_resource(Events, '/events', '/events?<int:event_id>')
-api.add_resource(Date, '/date', '/date?<string:date>')
-api.add_resource(Type, '/type', '/type?<string:type>')
-api.add_resource(Location, '/location', '/location?<string:location>')
-api.add_resource(Price, '/price', '/price?<float:price>')
+api.add_resource(Events, '/v1/events?<int:event_id>', endpoint='event')
+api.add_resource(Events, '/v1/events/name?<string:name>', endpoint='name')
+api.add_resource(Events, '/v1/events/date?<string:date>', endpoint='date')
+api.add_resource(Events, '/v1/events/type?<string:type>', endpoint='type')
+api.add_resource(Events, '/v1/events/location?<string:location>', endpoint='location')
+api.add_resource(Events, '/v1/events/price?<float:price>', endpoint='price')
 
 
 
 SWAGGER_URL = '/swagger1/v1'
-API_URL = 'http://127.0.0.1:5000/swagger.json'
+API_URL = 'http://127.0.0.1:5000/swagger1.json'
 swaggerui_blueprint = get_swaggerui_blueprint(
     SWAGGER_URL,
     API_URL,
@@ -251,11 +264,11 @@ swaggerui_blueprint = get_swaggerui_blueprint(
 )
 app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 
-@app.route('/swagger.json')
+@app.route('/swagger1.json')
 def swagger():
-    with open('swagger.json', 'r') as f:
+    with open('swagger1.json', 'r') as f:
         return jsonify(json.load(f))
 
 
-if __name__ == '__main__':
+if  __name__ == '__main__':
     app.run(debug=True)
