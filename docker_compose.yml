@@ -3,10 +3,11 @@ version: '3.8'
 services:
 
   app:
+    image: events:latest
     build:
       context: .
-      dockerfile: Dockerfile
-    restart: always
+      dockerfile: events.dockerfile
+    command: python3 app.py
     ports:
       - "5000:5000"
     volumes:
