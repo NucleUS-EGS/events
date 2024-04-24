@@ -1,26 +1,22 @@
-from sqlalchemy import create_engine
-from sqlalchemy.engine import reflection
-from sqlalchemy.orm import declarative_base
-from db_config import db, get_db
+from db_config import db
 
-engine = create_engine(get_db())
-
-Base = declarative_base()
-
-class APIKEYS(Base):
+class APIKEYS(db.Model):
     __tablename__ = 'apikeys'
     id = db.Column(db.Integer, primary_key=True)
+    apikey = db.Column(db.String(255), nullable=False)
     
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, apikey):
+        self.apikey = apikey
+
 
     def to_dict(self):
         return {
-            'id': self.id
+            'id': self.id,
+            'apikey': self.apikey
         }
     
 
-class Events(Base):
+class Events(db.Model):
     __tablename__ = 'events'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), nullable=False)
@@ -47,9 +43,9 @@ class Events(Base):
             'price': self.price
         }
     
-insp = reflection.Inspector.from_engine(engine)
+
+
     
-# if table does not exist, create it
-if not insp.has_table(APIKEYS.__tablename__):
-    print(" * Creating database tables")
-    Base.metadata.create_all(engine)
+
+
+

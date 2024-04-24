@@ -1,5 +1,7 @@
 from flask import Flask, jsonify, request, Response
 from flask_restful import Resource, Api, reqparse
+from sqlalchemy import create_engine
+from sqlalchemy.engine import reflection
 from flask_swagger_ui import get_swaggerui_blueprint
 from models import *
 from datetime import datetime
@@ -7,6 +9,7 @@ from db_config import *
 import mysql.connector
 from mysql.connector import Error
 import json
+from sqlalchemy.orm import sessionmaker
 
 
 app = Flask(__name__)
@@ -17,6 +20,23 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = get_sqlalchemy_track_modification
 
 db.init_app(app)
 
+APIKEY = os.environ.get('APIKEY')
+
+with app.app_context():
+    engine = create_engine(get_db())
+    insp = reflection.Inspector.from_engine(engine)
+    if not insp.has_table(APIKEYS.__tablename__):
+        print(' * Creating all tables')
+        db.create_all()
+
+        # insert APIKEY if doesn't exist
+        key = APIKEYS.query.filter(APIKEYS.apikey == APIKEY).first()
+        if not key:
+            print(' * Adding API Key')
+            key = APIKEYS(apikey=APIKEY)
+            db.session.add(key)
+            db.session.commit()
+
 def get_db_connection():
     try:
         conn = mysql.connector.connect(**db_config)
@@ -24,6 +44,10 @@ def get_db_connection():
     except Error as e:
         print(f"Error connecting to MySQL: {e}")
         return None
+
+@app.route('/') 
+def home():
+    return jsonify({"message": "Welcome to the Event API"})    
 
 class APIkey(Resource):
 
@@ -253,21 +277,21 @@ api.add_resource(Events, '/v1/events/price?<float:price>', endpoint='price')
 
 
 
-SWAGGER_URL = '/swagger1/v1'
-API_URL = 'http://127.0.0.1:5000/swagger1.json'
-swaggerui_blueprint = get_swaggerui_blueprint(
-    SWAGGER_URL,
-    API_URL,
-    config={
-        'app_name': "Event API"
-    }
-)
-app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
+# SWAGGER_URL = '/swagger1/v1'
+# API_URL = 'http://127.0.0.1:5000/swagger1.json'
+# swaggerui_blueprint = get_swaggerui_blueprint(
+#     SWAGGER_URL,
+#     API_URL,
+#     config={
+#         'app_name': "Event API"
+#     }
+# )
+# app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 
-@app.route('/swagger1.json')
-def swagger():
-    with open('swagger1.json', 'r') as f:
-        return jsonify(json.load(f))
+# @app.route('/swagger1.json')
+# def swagger():
+#     with open('swagger1.json', 'r') as f:
+#         return jsonify(json.load(f))
 
 
 if  __name__ == '__main__':
