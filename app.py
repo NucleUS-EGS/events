@@ -277,7 +277,7 @@ api.add_resource(Events, '/v1/events/price?<float:price>', endpoint='price')
 
 
 SWAGGER_URL = '/swagger1/v1'
-API_URL = 'http://127.0.0.1:5000/swagger1.json'
+API_URL = 'http://' + os.environ.get('FLASK_RUN_HOST') + ':' + os.environ.get('FLASK_RUN_PORT') + '/swagger.json'
 swaggerui_blueprint = get_swaggerui_blueprint(
     SWAGGER_URL,
     API_URL,
