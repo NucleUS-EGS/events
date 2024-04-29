@@ -287,9 +287,9 @@ swaggerui_blueprint = get_swaggerui_blueprint(
 )
 app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 
-@app.route('/swagger1.json')
+@app.route('/swagger.json')
 def swagger():
-    with open('swagger1.json', 'r') as f:
+    with open('swagger.json', 'r') as f:
         return jsonify(json.load(f))
 
 
