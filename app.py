@@ -276,23 +276,22 @@ api.add_resource(Events, '/v1/events/location?<string:location>', endpoint='loca
 api.add_resource(Events, '/v1/events/price?<float:price>', endpoint='price')
 
 
+SWAGGER_URL = '/swagger1/v1'
+API_URL = 'http://127.0.0.1:5000/swagger1.json'
+swaggerui_blueprint = get_swaggerui_blueprint(
+    SWAGGER_URL,
+    API_URL,
+    config={
+        'app_name': "Event API"
+    }
+)
+app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 
-# SWAGGER_URL = '/swagger1/v1'
-# API_URL = 'http://127.0.0.1:5000/swagger1.json'
-# swaggerui_blueprint = get_swaggerui_blueprint(
-#     SWAGGER_URL,
-#     API_URL,
-#     config={
-#         'app_name': "Event API"
-#     }
-# )
-# app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
-
-# @app.route('/swagger1.json')
-# def swagger():
-#     with open('swagger1.json', 'r') as f:
-#         return jsonify(json.load(f))
+@app.route('/swagger1.json')
+def swagger():
+    with open('swagger1.json', 'r') as f:
+        return jsonify(json.load(f))
 
 
 if  __name__ == '__main__':
-    app.run(debug=True)
+     app.run(host=os.getenv('FLASK_RUN_HOST'), port=os.getenv('FLASK_RUN_PORT'), debug=True)
