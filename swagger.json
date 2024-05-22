@@ -47,6 +47,23 @@
       }
     },
     "/events/{event_id}": {
+      "delete": {
+        "summary": "Delete an event by ID",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "ID of the event to delete"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Event deleted"
+          }
+        }
+      },
       "get": {
         "summary": "Get an event by ID",
         "parameters": [

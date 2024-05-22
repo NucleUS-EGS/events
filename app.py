@@ -65,6 +65,20 @@ class APIkey(Resource):
 
 class Events(Resource):
 
+    #DELWTE /events/<int:event_id>
+    def delete(self, event_id):
+        try:
+            event = Events.query.filter_by(id=event_id).first()
+            if event is None:
+                return jsonify({"error": "Event not found"}), 404
+
+            db.session.delete(event)
+            db.session.commit()
+            return '', 204
+        except Exception as e:
+            return {"error": str(e)}, 500
+
+
     #GET /events/<int:event_id>
     def get(self, event_id):
         parser = reqparse.RequestParser()
