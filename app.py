@@ -65,6 +65,20 @@ class APIkey(Resource):
 
 class Events(Resource):
 
+    #DELWTE /events/<int:event_id>
+    def delete(self, event_id):
+        try:
+            event = Events.query.filter_by(id=event_id).first()
+            if event is None:
+                return jsonify({"error": "Event not found"}), 404
+
+            db.session.delete(event)
+            db.session.commit()
+            return '', 204
+        except Exception as e:
+            return {"error": str(e)}, 500
+
+
     #GET /events/<int:event_id>
     def get(self, event_id):
         parser = reqparse.RequestParser()
@@ -277,7 +291,7 @@ api.add_resource(Events, '/v1/events/price?<float:price>', endpoint='price')
 
 
 SWAGGER_URL = '/swagger1/v1'
-API_URL = 'http://127.0.0.1:5000/swagger1.json'
+API_URL = 'http://127.0.0.1:8082/swagger1.json'
 swaggerui_blueprint = get_swaggerui_blueprint(
     SWAGGER_URL,
     API_URL,
