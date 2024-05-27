@@ -10,7 +10,7 @@ import mysql.connector
 from mysql.connector import Error
 import json
 from sqlalchemy.orm import sessionmaker
-
+from waitress import serve
 
 app = Flask(__name__)
 api = Api(app)
@@ -293,9 +293,11 @@ api.add_resource(Events, '/v1/events/type?<string:type>', endpoint='type')
 api.add_resource(Events, '/v1/events/location?<string:location>', endpoint='location')
 api.add_resource(Events, '/v1/events/price?<float:price>', endpoint='price')
 
+HOST = os.environ.get('APP_HOST')
+PORT = os.environ.get('APP_PORT')
 
-SWAGGER_URL = '/swagger/v1'
-API_URL = 'http://' + os.environ.get('FLASK_RUN_HOST') + ':' + os.environ.get('FLASK_RUN_PORT') + '/swagger.json'
+SWAGGER_URL = '/swagger/v1/'
+API_URL = 'http://' + HOST + ':' + PORT + '/swagger.json'
 swaggerui_blueprint = get_swaggerui_blueprint(
     SWAGGER_URL,
     API_URL,
@@ -311,5 +313,5 @@ def swagger():
         return jsonify(json.load(f))
 
 
-if  __name__ == '__main__':
-     app.run(host=os.getenv('FLASK_RUN_HOST'), port=os.getenv('FLASK_RUN_PORT'), debug=True)
+if __name__ == '__main__':
+    serve(app, host=HOST, port=PORT)
