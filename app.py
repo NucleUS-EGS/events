@@ -286,6 +286,7 @@ class Events(Resource):
 
        
 # Add the resources to the API
+api.add_resource(Events, '/v1/events', endpoint='events')
 api.add_resource(Events, '/v1/events?<int:event_id>', endpoint='event')
 api.add_resource(Events, '/v1/events/name?<string:name>', endpoint='name')
 api.add_resource(Events, '/v1/events/date?<string:date>', endpoint='date')
