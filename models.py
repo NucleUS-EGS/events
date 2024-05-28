@@ -1,20 +1,19 @@
+import uuid
 from db_config import db
 
 class APIKEYS(db.Model):
-    __tablename__ = 'apikeys'
-    id = db.Column(db.Integer, primary_key=True)
-    apikey = db.Column(db.String(255), nullable=False)
-    
-    def __init__(self, apikey):
-        self.apikey = apikey
-
-
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'apikey': self.apikey
-        }
-    
+        __tablename__ = 'APIKEYS'
+        ID = db.Column(db.String(100), primary_key=True)
+        
+        def __init__(self, id):
+            if id is None:
+                id = str(uuid.uuid4())
+            self.ID = id
+        
+        def to_dict(self):
+            return {
+                "ID": self.ID
+            }
 
 class Events(db.Model):
     __tablename__ = 'events'
