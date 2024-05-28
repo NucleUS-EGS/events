@@ -221,6 +221,7 @@ class Events(Resource):
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('name', type=str, required=True)
+        parser.add_argument('description', type=str, required=True)
         parser.add_argument('date', type=str, required=True)
         parser.add_argument('type', type=str, required=True)
         parser.add_argument('location', type=str, required=True)
@@ -230,6 +231,7 @@ class Events(Resource):
         try:
             event = Events(
                 name=args['name'],
+                description=args['description'],
                 date=args['date'],
                 type=args['type'],
                 location=args['location'],
@@ -245,6 +247,7 @@ class Events(Resource):
     def put(self, event_id):
         parser = reqparse.RequestParser()
         parser.add_argument('name', type=str, required=True)
+        parser.add_argument('description', type=str, required=True)
         parser.add_argument('date', type=str, required=True)
         parser.add_argument('type', type=str, required=True)
         parser.add_argument('location', type=str, required=True)
@@ -255,6 +258,7 @@ class Events(Resource):
             event = Events.query.filter_by(id=event_id).first()
         
             event.name = args['name']
+            event.description = args['description']
             event.date = args['date']
             event.type = args['type']
             event.location = args['location']
@@ -282,6 +286,7 @@ class Events(Resource):
 
        
 # Add the resources to the API
+api.add_resource(Events, '/v1/events', endpoint='events')
 api.add_resource(Events, '/v1/events?<int:event_id>', endpoint='event')
 api.add_resource(Events, '/v1/events/name?<string:name>', endpoint='name')
 api.add_resource(Events, '/v1/events/date?<string:date>', endpoint='date')
