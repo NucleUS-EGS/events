@@ -226,6 +226,7 @@ class Events(Resource):
         parser.add_argument('type', type=str, required=True)
         parser.add_argument('location', type=str, required=True)
         parser.add_argument('price', type=float, required=True)
+        parser.add_argument('points', type=str, required=True)
         args = parser.parse_args()
 
         try:
@@ -235,7 +236,8 @@ class Events(Resource):
                 date=args['date'],
                 type=args['type'],
                 location=args['location'],
-                price=args['price']
+                price=args['price'],
+                points=args['points']
             )
             db.session.add(event)
             db.session.commit()
@@ -252,6 +254,7 @@ class Events(Resource):
         parser.add_argument('type', type=str, required=True)
         parser.add_argument('location', type=str, required=True)
         parser.add_argument('price', type=float, required=True)
+        parser.add_argument('points', type=str, required=True)
         args = parser.parse_args()
 
         try:
@@ -263,6 +266,7 @@ class Events(Resource):
             event.type = args['type']
             event.location = args['location']
             event.price = args['price']
+            event.points = args['points']
 
             db.session.commit()
             return jsonify(event.to_dict()), 200

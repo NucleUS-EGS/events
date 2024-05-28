@@ -25,14 +25,17 @@ class Events(db.Model):
     type = db.Column(db.String(255), nullable=False)
     location = db.Column(db.String(255), nullable=False)
     price = db.Column(db.Float, nullable=False)
+    points = db.Column(db.Integer, nullable=False)
 
-    def __init__(self, name, description, date, location, price) -> None:
+    def __init__(self, name, description, date, location, price, points) -> None:
         self.name = name
         self.description = description
         self.date = date
         self.type = type
         self.location = location
         self.price = price
+        self.points = points
+
         super().__init__()
 
     def to_dict(self):
@@ -43,7 +46,8 @@ class Events(db.Model):
             'date': self.date,
             'type': self.type,
             'location': self.location,
-            'price': self.price
+            'price': self.price,
+            'points': self.points
         }
     
 
