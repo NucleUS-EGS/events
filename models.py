@@ -1,22 +1,21 @@
+import uuid
 from db_config import db
 
 class APIKEYS(db.Model):
-    __tablename__ = 'apikeys'
-    id = db.Column(db.Integer, primary_key=True)
-    apikey = db.Column(db.String(255), nullable=False)
-    
-    def __init__(self, apikey):
-        self.apikey = apikey
+        __tablename__ = 'APIKEYS'
+        ID = db.Column(db.String(100), primary_key=True)
+        
+        def __init__(self, id):
+            if id is None:
+                id = str(uuid.uuid4())
+            self.ID = id
+        
+        def to_dict(self):
+            return {
+                "ID": self.ID
+            }
 
-
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'apikey': self.apikey
-        }
-    
-
-class Events(db.Model):
+class EVENTS(db.Model):
     __tablename__ = 'events'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), nullable=False)
@@ -25,15 +24,16 @@ class Events(db.Model):
     type = db.Column(db.String(255), nullable=False)
     location = db.Column(db.String(255), nullable=False)
     price = db.Column(db.Float, nullable=False)
+    points = db.Column(db.Integer, nullable=False)
 
-    def __init__(self, name, description, date, location, price) -> None:
+    def __init__(self, name, description, date, location, price, points, type):
         self.name = name
         self.description = description
         self.date = date
         self.type = type
         self.location = location
         self.price = price
-        super().__init__()
+        self.points = points
 
     def to_dict(self):
         return {
@@ -43,7 +43,8 @@ class Events(db.Model):
             'date': self.date,
             'type': self.type,
             'location': self.location,
-            'price': self.price
+            'price': self.price,
+            'points': self.points
         }
     
 
