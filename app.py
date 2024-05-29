@@ -63,159 +63,19 @@ class APIkey(Resource):
             return {"error": str(e)}, 500
 
 
-class Events(Resource):
+class AllEvents(Resource):
 
-    #DELWTE /events/<int:event_id>
-    def delete(self, event_id):
+    #GET /events
+    def get(self):
         try:
-            event = Events.query.filter_by(id=event_id).first()
-            if event is None:
-                return jsonify({"error": "Event not found"}), 404
+            events = EVENTS.query.all()
+            if not events:
+                return jsonify([])
 
-            db.session.delete(event)
-            db.session.commit()
-            return '', 204
-        except Exception as e:
-            return {"error": str(e)}, 500
-
-
-    #GET /events/<int:event_id>
-    def get(self, event_id):
-        parser = reqparse.RequestParser()
-        parser.add_argument('event_id', type=int)
-        args = parser.parse_args()
-        event_id = args['event_id']
-
-        try:
-            if event_id is None:
-                events = Events.query.all()
-                if not events:
-                    return jsonify([])
-
-                return jsonify([event.to_dict() for event in events])
-            else:
-                events = Events.query.filter_by(id=event_id).first()
-                if events is None:
-                    return jsonify({"error": "Event not found"}), 404
-                
-            return jsonify([events.to_dict()])
+            return jsonify([event.to_dict() for event in events])
         except Exception as e:
             return {"error": str(e)}, 500
         
-    #GET /events/name?<string:name>
-    def get(self, name):
-        parser = reqparse.RequestParser()
-        parser.add_argument('name', type=str)
-        args = parser.parse_args()
-        name = args['name']
-
-        try:
-            if name is None:
-                events = Events.query.all()
-                if not events:
-                    return jsonify([])
-
-                return jsonify([event.to_dict() for event in events])
-            else:
-                events = Events.query.filter_by(name=name).first()
-                if events is None:
-                    return jsonify({"error": "Event not found"}), 404
-                
-            return jsonify([events.to_dict()])
-        except Exception as e:
-            return {"error": str(e)}, 500
-
-    #GET /events/date?<string:date>
-    def get(self, date):    
-        parser = reqparse.RequestParser()
-        parser.add_argument('date', type=str)
-        args = parser.parse_args()
-        date = args['date']
-
-        try:
-            if date is None:
-                events = Events.query.all()
-                if not events:
-                    return jsonify([])
-
-                return jsonify([event.to_dict() for event in events])
-            else:
-                events = Events.query.filter_by(date=date).first()
-                if events is None:
-                    return jsonify({"error": "Event not found"}), 404
-                
-            return jsonify([events.to_dict()])
-        except Exception as e:
-            return {"error": str(e)}, 500
-
-    #GET /events/type?<string:type>
-    def get(self, type):
-        parser = reqparse.RequestParser()
-        parser.add_argument('type', type=str)
-        args = parser.parse_args()
-        type = args['type']
-
-        try:
-            if type is None:
-                events = Events.query.all()
-                if not events:
-                    return jsonify([])
-
-                return jsonify([event.to_dict() for event in events])
-            else:
-                events = Events.query.filter_by(type=type).first()
-                if events is None:
-                    return jsonify({"error": "Event not found"}), 404
-                
-            return jsonify([events.to_dict()])
-        except Exception as e:
-            return {"error": str(e)}, 500
-
-    #GET /events/location?<string:location>
-    def get(self, location):
-        parser = reqparse.RequestParser()
-        parser.add_argument('location', type=str)
-        args = parser.parse_args()
-        location = args['location']
-
-        try:
-            if location is None:
-                events = Events.query.all()
-                if not events:
-                    return jsonify([])
-
-                return jsonify([event.to_dict() for event in events])
-            else:
-                events = Events.query.filter_by(location=location).first()
-                if events is None:
-                    return jsonify({"error": "Event not found"}), 404
-                
-            return jsonify([events.to_dict()])
-        except Exception as e:
-            return {"error": str(e)}, 500
-
-    #GET /events/price?<float:price>
-    def get(self, price):
-        parser = reqparse.RequestParser()
-        parser.add_argument('price', type=float)
-        args = parser.parse_args()
-        price = args['price']
-
-        try:
-            if price is None:
-                events = Events.query.all()
-                if not events:
-                    return jsonify([])
-
-                return jsonify([event.to_dict() for event in events])
-            else:
-                events = Events.query.filter_by(price=price).first()
-                if events is None:
-                    return jsonify({"error": "Event not found"}), 404
-                
-            return jsonify([events.to_dict()])
-        except Exception as e:
-            return {"error": str(e)}, 500
 
     #POST /events
     def post(self):
@@ -230,7 +90,7 @@ class Events(Resource):
         args = parser.parse_args()
 
         try:
-            event = Events(
+            event = EVENTS(
                 name=args['name'],
                 description=args['description'],
                 date=args['date'],
@@ -241,9 +101,157 @@ class Events(Resource):
             )
             db.session.add(event)
             db.session.commit()
-            return jsonify(event.to_dict()), 201
+
+            return {"message": "Created event"}, 201
         except Exception as e:
             return {"error": str(e)}, 500
+
+
+class Events(Resource):
+
+    #DELWTE /events/<int:event_id>
+    def delete(self, event_id):
+        try:
+            event = EVENTS.query.filter_by(id=event_id).first()
+            if event is None:
+                return jsonify({"error": "Event not found"}), 404
+
+            db.session.delete(event)
+            db.session.commit()
+            return '', 204
+        except Exception as e:
+            return {"error": str(e)}, 500
+            
+
+    #GET /events/<int:event_id>
+    def get(self, event_id):
+        try:
+            if event_id is None:
+                return jsonify({"error": "Event not found"}), 404
+            
+            event = EVENTS.query.filter_by(id=event_id).first()
+            if event is None:
+                return jsonify({"error": "Event not found"}), 404
+            
+            return jsonify(event.to_dict())
+        
+        except Exception as e:
+            return {"error": str(e)}, 500
+
+    # #GET /events/name?<string:name>
+    # def get(self, name):
+    #     parser = reqparse.RequestParser()
+    #     parser.add_argument('name', type=str)
+    #     args = parser.parse_args()
+    #     name = args['name']
+
+    #     try:
+    #         if name is None:
+    #             events = EVENTS.query.all()
+    #             if not events:
+    #                 return jsonify([])
+
+    #             return jsonify([event.to_dict() for event in events])
+    #         else:
+    #             events = EVENTS.query.filter_by(name=name).first()
+    #             if events is None:
+    #                 return jsonify({"error": "Event not found"}), 404
+                
+    #         return jsonify([events.to_dict()])
+    #     except Exception as e:
+    #         return {"error": str(e)}, 500
+
+    # #GET /events/date?<string:date>
+    # def get(self, date):    
+    #     parser = reqparse.RequestParser()
+    #     parser.add_argument('date', type=str)
+    #     args = parser.parse_args()
+    #     date = args['date']
+
+    #     try:
+    #         if date is None:
+    #             events = EVENTS.query.all()
+    #             if not events:
+    #                 return jsonify([])
+
+    #             return jsonify([event.to_dict() for event in events])
+    #         else:
+    #             events = EVENTS.query.filter_by(date=date).first()
+    #             if events is None:
+    #                 return jsonify({"error": "Event not found"}), 404
+                
+    #         return jsonify([events.to_dict()])
+    #     except Exception as e:
+    #         return {"error": str(e)}, 500
+
+    # #GET /events/type?<string:type>
+    # def get(self, type):
+    #     parser = reqparse.RequestParser()
+    #     parser.add_argument('type', type=str)
+    #     args = parser.parse_args()
+    #     type = args['type']
+
+    #     try:
+    #         if type is None:
+    #             events = EVENTS.query.all()
+    #             if not events:
+    #                 return jsonify([])
+
+    #             return jsonify([event.to_dict() for event in events])
+    #         else:
+    #             events = EVENTS.query.filter_by(type=type).first()
+    #             if events is None:
+    #                 return jsonify({"error": "Event not found"}), 404
+                
+    #         return jsonify([events.to_dict()])
+    #     except Exception as e:
+    #         return {"error": str(e)}, 500
+
+    # #GET /events/location?<string:location>
+    # def get(self, location):
+    #     parser = reqparse.RequestParser()
+    #     parser.add_argument('location', type=str)
+    #     args = parser.parse_args()
+    #     location = args['location']
+
+    #     try:
+    #         if location is None:
+    #             events = EVENTS.query.all()
+    #             if not events:
+    #                 return jsonify([])
+
+    #             return jsonify([event.to_dict() for event in events])
+    #         else:
+    #             events = EVENTS.query.filter_by(location=location).first()
+    #             if events is None:
+    #                 return jsonify({"error": "Event not found"}), 404
+                
+    #         return jsonify([events.to_dict()])
+    #     except Exception as e:
+    #         return {"error": str(e)}, 500
+
+    # #GET /events/price?<float:price>
+    # def get(self, price):
+    #     parser = reqparse.RequestParser()
+    #     parser.add_argument('price', type=float)
+    #     args = parser.parse_args()
+    #     price = args['price']
+
+    #     try:
+    #         if price is None:
+    #             events = EVENTS.query.all()
+    #             if not events:
+    #                 return jsonify([])
+
+    #             return jsonify([event.to_dict() for event in events])
+    #         else:
+    #             events = EVENTS.query.filter_by(price=price).first()
+    #             if events is None:
+    #                 return jsonify({"error": "Event not found"}), 404
+                
+    #         return jsonify([events.to_dict()])
+    #     except Exception as e:
+    #         return {"error": str(e)}, 500
 
     #PUT /events/<int:event_id>
     def put(self, event_id):
@@ -258,7 +266,7 @@ class Events(Resource):
         args = parser.parse_args()
 
         try:
-            event = Events.query.filter_by(id=event_id).first()
+            event = EVENTS.query.filter_by(id=event_id).first()
         
             event.name = args['name']
             event.description = args['description']
@@ -276,7 +284,7 @@ class Events(Resource):
     #DELETE /events/<int:event_id>
     def delete(self, event_id):
         try:
-            event = Events.query.filter_by(id=event_id).first()
+            event = EVENTS.query.filter_by(id=event_id).first()
             if event is None:
                 return jsonify({"error": "Event not found"}), 404
 
@@ -290,8 +298,8 @@ class Events(Resource):
 
        
 # Add the resources to the API
-api.add_resource(Events, '/v1/events', endpoint='events')
-api.add_resource(Events, '/v1/events?<int:event_id>', endpoint='event')
+api.add_resource(AllEvents, '/v1/events', endpoint='events')
+api.add_resource(Events, '/v1/events/<int:event_id>', endpoint='event')
 api.add_resource(Events, '/v1/events/name?<string:name>', endpoint='name')
 api.add_resource(Events, '/v1/events/date?<string:date>', endpoint='date')
 api.add_resource(Events, '/v1/events/type?<string:type>', endpoint='type')

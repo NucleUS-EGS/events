@@ -15,7 +15,7 @@ class APIKEYS(db.Model):
                 "ID": self.ID
             }
 
-class Events(db.Model):
+class EVENTS(db.Model):
     __tablename__ = 'events'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), nullable=False)
@@ -26,7 +26,7 @@ class Events(db.Model):
     price = db.Column(db.Float, nullable=False)
     points = db.Column(db.Integer, nullable=False)
 
-    def __init__(self, name, description, date, location, price, points) -> None:
+    def __init__(self, name, description, date, location, price, points, type):
         self.name = name
         self.description = description
         self.date = date
@@ -34,8 +34,6 @@ class Events(db.Model):
         self.location = location
         self.price = price
         self.points = points
-
-        super().__init__()
 
     def to_dict(self):
         return {
